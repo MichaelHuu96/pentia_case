@@ -1,0 +1,25 @@
+@model List<SalesPerson>
+
+@{
+    ViewBag.Title = "Salespeople";
+}
+
+<h1>@ViewBag.Title</h1>
+
+<p>@ViewBag.Message</p>
+
+@if (Model != null && Model.Count > 0)
+{
+    <ul>
+        @foreach (var salesperson in Model)
+        {
+            <li>
+                <a href="/Sales/Detail?id=@salesperson.Id">@salesperson.Name</a> - @salesperson.OrderCount
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No salespeople found.</p>
+}

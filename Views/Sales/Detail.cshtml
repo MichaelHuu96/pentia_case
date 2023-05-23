@@ -1,0 +1,35 @@
+@model SalesPerson
+
+@{
+    ViewBag.Title = "Salesperson Detail";
+}
+
+<h1>@Model.Name</h1>
+
+<h3>Information:</h3>
+<p>Salesperson ID: @Model.Id</p>
+<p>Name: @Model.Name</p>
+<p>Hire Date: @Model.HireDate</p>
+<p>Address: @Model.Address</p>
+<p>City: @Model.City</p>
+<p>Zip Code: @Model.ZipCode</p>
+<p>numbers of orders @Model.OrderCount</p>
+
+
+@Html.ActionLink("View Orders Graph", "OrdersGraph", "Sales")
+
+<h3>Orders (Order ids):</h3>
+@if (Model.OrderList != null && Model.OrderList.Count > 0)
+{
+    <ul>
+        @foreach (var orderId in Model.OrderList)
+        {
+            <li>@orderId </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No orders found.</p>
+}
+
