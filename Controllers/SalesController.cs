@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pentia.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Pentia.Controllers
 {
@@ -23,8 +24,8 @@ namespace Pentia.Controllers
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("https://azurecandidatetestapi.azurewebsites.net/");
             httpClient.DefaultRequestHeaders.Add("ApiKey", "test1234");
-
             var version = "1.0"; // Replace with the desired version
+
             var salespeopleEndpointUrl = $"api/v{version}/SalesPersons";
             var orderlinesEndpointUrl = $"api/v{version}/Orderlines";
 
@@ -33,6 +34,8 @@ namespace Pentia.Controllers
 
             var salespeopleJson = await salespeopleResponse.Content.ReadAsStringAsync();
             var salespeople = JsonConvert.DeserializeObject<List<SalesPerson>>(salespeopleJson);
+
+
 
             if (salespeople != null && salespeople.Count > 0)
             {
@@ -177,32 +180,65 @@ namespace Pentia.Controllers
             return orderCount;
         }
 
+        public async Task<IActionResult> OrdersGraph(int id)
+        {
+            System.Console.WriteLine("in OrderGraphs. Id:" + id);
+            var salesPersonOrderList = await GetSalesPersonOrderList(id);
+
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("https://azurecandidatetestapi.azurewebsites.net/");
+            httpClient.DefaultRequestHeaders.Add("ApiKey", "test1234");
+            var version = "1.0";
+            var endpointUrl = $"api/v{version}/Orderlines";
+
+            try
+            {
+                var response = await httpClient.GetAsync(endpointUrl);
+                response.EnsureSuccessStatusCode();
+
+                var ordersJson = await response.Content.ReadAsStringAsync();
+                var orders = JsonConvert.DeserializeObject<List<Order>>(ordersJson);
+
+                var orderCountsByMonth = new Dictionary<string, int>();
+
+                foreach (var order in orders)
+                {
+                    if (order.SalesPersonId == id)
+                    {
+                        DateTime orderDateTime;
+                        if (DateTime.TryParseExact(order.OrderDate, new[] { "dd-MM-yyyy HH:mm", "yyyy-MM-dd HH:mm" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out orderDateTime))
+                        {
+                            var orderMonth = orderDateTime.ToString("MMMM yyyy");
+
+                            if (orderCountsByMonth.ContainsKey(orderMonth))
+                            {
+                                orderCountsByMonth[orderMonth]++;
+                            }
+                            else
+                            {
+                                orderCountsByMonth[orderMonth] = 1;
+                            }
+                        }
+                    }
+                }
+
+                var sortedOrderCounts = orderCountsByMonth.OrderBy(entry => DateTime.Parse(entry.Key)).ToList();
+                var dates = sortedOrderCounts.Select(entry => entry.Key);
+                var orderCounts = sortedOrderCounts.Select(entry => entry.Value);
+
+                ViewBag.Dates = dates;
+                ViewBag.OrderCounts = orderCounts;
+
+                return View();
+            }
+            catch (HttpRequestException)
+            {
+                return NotFound();
+            }
+        }
 
 
-public IActionResult OrdersGraph()
-{
-    // Fetch orders data and process it to generate the graph
 
-    // Replace the following placeholder code with the actual logic to retrieve and process the order data
-
-    var orderData = new Dictionary<DateTime, int>
-    {
-        { new DateTime(2023, 4, 10), 20 }, // Example data, replace with actual order data
-        // Add more entries as per your actual order data
-    };
-
-    // Sort the order data by date
-    var sortedOrderData = orderData.OrderBy(entry => entry.Key);
-
-    // Extract the dates and order counts for the graph
-    var dates = sortedOrderData.Select(entry => entry.Key.ToString("yyyy-MM-dd"));
-    var orderCounts = sortedOrderData.Select(entry => entry.Value);
-
-    ViewBag.Dates = dates;
-    ViewBag.OrderCounts = orderCounts;
-
-    return View();
-}
 
 
     }

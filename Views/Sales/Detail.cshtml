@@ -15,8 +15,7 @@
 <p>Zip Code: @Model.ZipCode</p>
 <p>numbers of orders @Model.OrderCount</p>
 
-
-@Html.ActionLink("View Orders Graph", "OrdersGraph", "Sales")
+ <a href="/Sales/OrdersGraph?id=@Model.Id">View Orders Graph</a> 
 
 <h3>Orders (Order ids):</h3>
 @if (Model.OrderList != null && Model.OrderList.Count > 0)

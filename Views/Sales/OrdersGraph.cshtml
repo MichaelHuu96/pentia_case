@@ -1,25 +1,26 @@
+@model SalesPerson
+
 @{
     ViewBag.Title = "Orders Graph";
 }
 
 <h1>Orders Graph</h1>
 
-<canvas id="orderGraph" width="800" height="400"></canvas>
+<canvas id="ordersGraph" width="800" height="400"></canvas>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         var dates = @Html.Raw(Json.Serialize(ViewBag.Dates));
         var orderCounts = @Html.Raw(Json.Serialize(ViewBag.OrderCounts));
 
-        var ctx = document.getElementById('orderGraph').getContext('2d');
+        var ctx = document.getElementById('ordersGraph').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: dates,
                 datasets: [{
-                    label: 'Order Count',
+                    label: 'Number of Orders',
                     data: orderCounts,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
